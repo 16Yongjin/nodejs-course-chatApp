@@ -13,6 +13,19 @@ app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
     console.log('New user connected');
+    
+    socket.emit('newMessage', { //환영 메시지
+        from: 'Admin',
+        text: 'Welcome to the chat app',
+        createAt: new Date().getDate()
+    });
+
+    socket.broadcast.emit('newMessage', { //새 유저에게는 안보이는 입장 메시지,
+        from: 'Admin',
+        text: 'New user joined',
+        createAt: new Date().getDate()
+
+    });
 
     socket.on('createMessage', (message) => { //메시지 받으면
         console.log(message);
@@ -21,7 +34,7 @@ io.on('connection', (socket) => {
             from: message.from,
             text: message.text,
             createAt: new Date().getTime()
-        })
+        });
     });
 
     socket.on('disconnect', () => {
