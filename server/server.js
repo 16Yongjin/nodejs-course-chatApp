@@ -26,11 +26,11 @@ io.on('connection', (socket) => {
             return callback('Name and room name are required!');
         }
 
-        socket.join(params.room);
-        users.removeUser(socket.id);
+        socket.join(params.room); 
+        users.removeUser(socket.id); // 중복되는 아이디 제거
         users.addUser(socket.id, params.name, params.room);
 
-        io.to(params.room).emit('updateUserList',users.getUserList(params.room))
+        io.to(params.room).emit('updateUserList',users.getUserList(params.room));
 
 
         socket.emit('newMessage', generateMessage('Admin', 'Welcome To the chat app'));
@@ -38,17 +38,25 @@ io.on('connection', (socket) => {
 
 
 
-        callback();
+        callback(); // 에러 없음을 보냄
     });
 
     socket.on('createMessage', (message, callback) => { //메시지 받으면
-        console.log(message);
-        io.emit('newMessage', generateMessage(message.from, message.text));
-        callback('This is from the server');
+        var user = users.getUser(socket.id);
+        if (user && isRealString(message.text)) {
+            io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+
+            callback('This is from the server');
+        }
+
+
     });
 
     socket.on('createLocationMessage', (coords, callback) => {
-        io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+        var user = users.getUser(socket.id);
+        if (user) {
+            io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+        }
     })
 
     socket.on('disconnect', () => {

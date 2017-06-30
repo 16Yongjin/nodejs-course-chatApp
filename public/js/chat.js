@@ -1,6 +1,6 @@
 var socket = io();
 
-function scrollToBottom () {
+function scrollToBottom () { // 스크롤하기 
     //Selectors
     var messages = jQuery('#messages');
     var newMessage = messages.children('li:last-child');
@@ -17,13 +17,13 @@ function scrollToBottom () {
 
 }
 
-socket.on('connect', function () {
-    var params = jQuery.deparam(window.location.search);
+socket.on('connect', function () { // 연결되면
+    var params = jQuery.deparam(window.location.search); //매개변수들 받아서
 
     socket.emit('join', params, function (err) {
-        if (err) {
+        if (err) { // 에러나면 뒤로 가기
             alert(err);
-            window.location.href = '/'; //빠꾸
+            window.location.href = '/';
         } else {
             console.log('No error :)');
         }
@@ -61,7 +61,6 @@ jQuery('#message-form').on('submit', function (e) {
     var messageTextbox = jQuery('[name=message]')
 
     socket.emit('createMessage', {
-        from: 'User',
         text: messageTextbox.val()
     }, function () {
         messageTextbox.val('')
