@@ -45,9 +45,5 @@ function setRoomList(rooms) {
      
 }
 
-function showRooms() {
-    
-}
-
 
 
