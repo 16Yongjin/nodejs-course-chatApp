@@ -32,7 +32,6 @@ io.on('connection', (socket) => {
 
         rooms.addRoom(params.room);
         io.emit('currentRooms', rooms.getRoomList());
-        console.log(rooms.rooms);
 
         users.removeUser(socket.id); // 중복되는 아이디 제거
         users.addUser(socket.id, params.name, params.room);
