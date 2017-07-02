@@ -7,6 +7,7 @@ const socketIO = require('socket.io');
 const {generateMessage, generateLocationMessage} = require('./utils/message');
 const {isRealString} = require('./utils/validation');
 const {Users} = require('./utils/users');
+const {Rooms} = require('./utils/rooms');
 
 const publicPath = path.join(__dirname, '..', '/public');
 const port = process.env.PORT || 3000;
@@ -14,6 +15,7 @@ var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
 var users = new Users();
+var rooms = new Rooms();
 
 app.use(express.static(publicPath));
 
@@ -27,6 +29,12 @@ io.on('connection', (socket) => {
         }
 
         socket.join(params.room); 
+
+        rooms.addRoom(params.room);
+        io.emit('currentRooms', rooms.getRoomList());
+        console.log(rooms.getRoomList());
+        console.log(rooms.rooms);
+
         users.removeUser(socket.id); // 중복되는 아이디 제거
         users.addUser(socket.id, params.name, params.room);
 
@@ -39,6 +47,11 @@ io.on('connection', (socket) => {
 
 
         callback(); // 에러 없음을 보냄
+    });
+
+
+    socket.on('getCurrentRooms', (message, callback) => {
+        callback(rooms.getRoomList());
     });
 
     socket.on('createMessage', (message, callback) => { //메시지 받으면
@@ -61,10 +74,15 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         var user = users.removeUser(socket.id);
+        
 
         if (user) {
             io.to(user.room).emit('updateUserList', users.getUserList(user.room));
             io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left`));
+            if (users.getUserList(user.room).length <= 0) {
+                rooms.removeRoom(user.room);
+                io.emit('currentRooms', rooms.getRoomList());
+            }
         }
     });
 });
