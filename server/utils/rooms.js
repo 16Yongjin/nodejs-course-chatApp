@@ -8,9 +8,6 @@ class Rooms {
         if (this.rooms.length == 0 || (this.rooms.filter((a) => a === room) === []))
         {
             this.rooms.push(room);
-            console.log(room);
-            console.log('room added');
-            console.log(room in this.rooms);
         }
 
         
